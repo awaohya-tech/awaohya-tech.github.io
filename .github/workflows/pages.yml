@@ -30,3 +30,17 @@ jobs:
           path: '.'
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Validate published website and privacy policy
+        run: |
+          python - <<'PY'
+          import urllib.request
+          for url,needle in [
+            ('https://awaohya-tech.github.io/', 'Stock Checker Cloud'),
+            ('https://awaohya-tech.github.io/privacy.html', 'プライバシーポリシー'),
+            ('https://awaohya-tech.github.io/terms.html', '利用上の注意'),
+          ]:
+            with urllib.request.urlopen(url, timeout=20) as r:
+              body=r.read().decode('utf-8')
+              assert r.status==200 and needle in body, (url,r.status)
+              print('Verified',r.status,url,len(body))
+          PY
